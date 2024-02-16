@@ -1,13 +1,11 @@
-
 import torch
-import torch.nn as nn
+from torch import nn 
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor
-import time
 
 device = ("cuda" if torch.cuda.is_available() else "cpu")
-print(f"learning will be run on : {device}")
+print(f"device : {device}")
 
 #torch.set_default_device("cuda")
 
@@ -55,24 +53,14 @@ class Model(nn.Module):
         return self.linear_stack(X)
 
 model = Model().to(device)
+print("Loading model . . .")
+model.load_state_dict(torch.load("model.pth"))
 
 loss_fn = nn.CrossEntropyLoss()
 optimization = torch.optim.SGD(
     model.parameters()
 )
 
-def train(model : Model, dataset, loss_fn : nn.CrossEntropyLoss, optimization : torch.optim.SGD):
-    model.train(True)
-    for X, y in dataset:
-        X = X.to(device)
-        y = y.to(device)
-
-        prediction = model(X)
-        loss = loss_fn(prediction, y)
-        #backwards
-        loss.backward()               
-        optimization.step()
-        optimization.zero_grad() # clear
 
 def test(model, dataset, loss_fn : nn.CrossEntropyLoss):
     model.train(False)
@@ -89,17 +77,7 @@ def test(model, dataset, loss_fn : nn.CrossEntropyLoss):
     accuraccy /= len(dataset.dataset)
     print(f"accuraccy : {round(100 * accuraccy, 2)}%")
 
-time_start = time.time()
-batchs = 10
-for batch in range(batchs):
-    print(f"batch : {batch}")
-    train(model, data_train, loss_fn, optimization)
-    test(model, data_train, loss_fn)
-time_stop = time.time()
-print(f"total time : {round(time_stop-time_start, 2)}s")
 
-print("end of learnig -- save model")
-torch.save(model.state_dict(), "model.pth")
-print("Saved PyTorch Model State to model.pth")
-
+print("Testing model accuracy")
+test(model, data_train, loss_fn)
 
