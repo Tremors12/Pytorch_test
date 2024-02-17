@@ -90,16 +90,18 @@ def test(model, dataset, loss_fn : nn.CrossEntropyLoss):
     print(f"accuraccy : {round(100 * accuraccy, 2)}%")
 
 time_start = time.time()
-batchs = 10
+batchs = 100
 for batch in range(batchs):
     print(f"batch : {batch}")
     train(model, data_train, loss_fn, optimization)
     test(model, data_train, loss_fn)
+    if batch % 10 == 0 and batch != 0: 
+        print(f"save model at bach : {batch}")
+        torch.save(model.state_dict(), "model.pth")
+
 time_stop = time.time()
 print(f"total time : {round(time_stop-time_start, 2)}s")
 
-print("end of learnig -- save model")
+print("end of learnig -- save last version of model")
 torch.save(model.state_dict(), "model.pth")
 print("Saved PyTorch Model State to model.pth")
-
-
